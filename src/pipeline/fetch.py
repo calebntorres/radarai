@@ -1,11 +1,13 @@
 import pandas as pd
-import math
+from scipy import spatial
+import numpy as np
+from scipy.spatial import KDTree
 
-# fetches image most matching given spatio-temporal definition (time and location)
+# will fetch radar scan that coincides with specific time and location
 def fetch_image(self, coordinates, time):
     pass
 
-# returns dictionary of station abrevs as keys and x, y coordinate values in di-entry list as values
+# returns dictionary of station abbreviations and cartesian coordinates
 def station_coordinates():
     stations = pd.read_csv('stations_csv.csv', encoding='unicode_escape')
     stations = stations[['ICAO', 'X\'', 'Y\'']]
@@ -21,32 +23,29 @@ def station_coordinates():
 
     return stations_dict
 
-# find nearest station for given input coordinates
+# returns cartesian coordinates of stations in a numpy array for use in nn search
+def station_array():
+    stations = pd.read_csv('stations_csv.csv', encoding='unicode_escape')
+    stations = stations[['ICAO', 'X\'', 'Y\'']]
+    stations_array = stations[['X\'', 'Y\'']].to_numpy()
+
+    return stations_array
+
+# find nearest station for given input coordinates using binary search
 def localize(x, y):
     x_input, y_input = x, y
-    station_coords = station_coordinates()
-    distance = 0
-    for item in station_coords:
-        x_cand = float(station_coords.get(item)[0])
-        y_cand = float(station_coords.get(item)[1])
+    array = station_array()
+    Tree = KDTree(array)
 
-        distance = math.sqrt(((x_input-x_cand)**2)+((y_input-y_cand)**2))
-        print(distance)
+    #find distance and index of nearest station
+    nn_result = Tree.query([x, y], k=1)
 
+    return nn_result
             
 if __name__ == "__main__":
-    localize(34.67, 21.987)
+    result = localize(34.67, 21.987)
+    print(f'Distance to Nearast radar (Coordinate Units): {result[0]}\nIndex (Check Station List): {result[1]}')
 
-
-
-
-
-    '''
-    get radar slices constrained by:
-        1. number of images symmetric on target time and place (time and station)
-        2. time interval between consecutive images    
-    
-    '''
         
         
 
