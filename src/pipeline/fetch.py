@@ -8,7 +8,7 @@ def fetch_image(self, coordinates, time):
     pass
 
 # returns dictionary of station abbreviations and cartesian coordinates
-def station_coordinates():
+def get_stations():
     stations = pd.read_csv('stations_csv.csv', encoding='unicode_escape')
     stations = stations[['ICAO', 'X\'', 'Y\'']]
     stations_dict = {}
@@ -24,27 +24,37 @@ def station_coordinates():
     return stations_dict
 
 # returns cartesian coordinates of stations in a numpy array for use in nn search
-def station_array():
+def get_station_array():
     stations = pd.read_csv('stations_csv.csv', encoding='unicode_escape')
-    stations = stations[['ICAO', 'X\'', 'Y\'']]
-    stations_array = stations[['X\'', 'Y\'']].to_numpy()
+    stations_array = stations[['ICAO', 'X\'', 'Y\'']].to_numpy()
 
     return stations_array
 
-# find nearest station for given input coordinates using binary search
+# find nearest station for given input coordinates using KDTree data structure
 def localize(x, y):
     x_input, y_input = x, y
-    array = station_array()
-    Tree = KDTree(array)
+    array = get_station_array()
+    coordinate_array = array[:, [1, 2]]
+    Tree = KDTree(coordinate_array)
 
-    #find distance and index of nearest station
-    nn_result = Tree.query([x, y], k=1)
-
-    return nn_result
+    #find distance and index of nearest station and return corresponding station
+    nn_result = Tree.query([x_input, y_input], k=1)
+    distance = nn_result[0]
+    index = nn_result[1]
+    nearest_coords = coordinate_array[index]
+    nearest_station = array[index][0]
+    
+    return nearest_station
             
 if __name__ == "__main__":
-    result = localize(34.67, 21.987)
-    print(f'Distance to Nearast radar (Coordinate Units): {result[0]}\nIndex (Check Station List): {result[1]}')
+    nearest_stat = localize(42.9678286, 88.5506335)
+    print(nearest_stat)
+    
+
+    
+
+    
+    
 
         
         
