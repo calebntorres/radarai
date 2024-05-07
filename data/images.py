@@ -47,7 +47,7 @@ def localize(x, y):
     return nearest_station
             
 if __name__ == "__main__":
-    nearest_stat = localize(42.9678286, 88.5506335)
+    nearest_stat = localize()
     print(nearest_stat)
     
 
